@@ -6,7 +6,7 @@ class modLeftMenu extends DolibarrModules
 {
   public function __construct($db)
   {
-    global $langs;
+    global $langs, $conf;
     $this->db = $db;
 
     $this->numero       = 129901;
@@ -22,8 +22,14 @@ class modLeftMenu extends DolibarrModules
 
     // Module parts - enable hooks
     $this->module_parts = array(
-      'hooks' => array('leftblock', 'main')
+      'hooks' => array('leftblock', 'main', 'commonobject')
     );
+
+    // Admin pages
+    $this->dirs = array();
+    
+    // Config page
+    $this->config_page_url = array("setup.php@leftmenu");
 
     // Rights
     $this->rights = array();

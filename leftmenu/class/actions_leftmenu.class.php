@@ -2,7 +2,7 @@
 /**
  * Hook class for FancyLeftMenu
  */
-class ActionsLeftMenu
+class ActionsLeftmenu
 {
     public $db;
     public $conf;
