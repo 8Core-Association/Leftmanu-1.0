@@ -69,27 +69,22 @@ class ActionsLeftmenu
         
         // Hide original menu with JavaScript
         echo '<style>
-            /* Hide original left menu */
-            div#id-left, 
-            .side-nav-vert,
-            #leftmenu { 
+            /* Hide only original left menu, NOT top menu */
+            div#id-left { 
                 display: none !important; 
             }
             
-            /* Adjust main container */
-            #id-container,
-            .fiche { 
+            /* Adjust main content container */
+            #id-container { 
                 margin-left: 280px !important; 
             }
         </style>';
         
         echo '<script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Additional JavaScript hiding
-            var leftMenus = document.querySelectorAll("#id-left, .side-nav-vert, #leftmenu");
-            leftMenus.forEach(function(menu) {
-                if (menu) menu.style.display = "none";
-            });
+            // Hide only left menu, preserve top menu
+            var leftMenu = document.querySelector("#id-left");
+            if (leftMenu) leftMenu.style.display = "none";
             
             // Adjust container
             var container = document.querySelector("#id-container");
