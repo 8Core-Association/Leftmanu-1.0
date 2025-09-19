@@ -1,5 +1,5 @@
 <?php
-/* LeftMenu module descriptor */
+/* FancyLeftMenu module descriptor */
 include_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
 
 class modLeftMenu extends DolibarrModules
@@ -9,79 +9,59 @@ class modLeftMenu extends DolibarrModules
     global $langs;
     $this->db = $db;
 
-    $this->numero       = 129901;                       // Unique ID
+    $this->numero       = 129901;
     $this->rights_class = 'leftmenu';
-    $this->family       = "ECM";
-    $this->name         = "LeftMenu";
-    $this->description  = "Lightweight left-side menu (scoped UI)";
-    $this->version      = '1.0.0';
+    $this->family       = "interface";
+    $this->name         = "FancyLeftMenu";
+    $this->description  = "Modern, fancy replacement for Dolibarr left menu with animations and sub-menus";
+    $this->version      = '2.0.0';
     $this->const_name   = 'MAIN_MODULE_LEFTMENU';
     $this->editor_name  = '8Core Association';
     $this->editor_url   = 'https://8core.hr';
     $this->picto        = 'generic';
 
-    $this->module_parts = array();
+    // Module parts - enable hooks
+    $this->module_parts = array(
+      'hooks' => array('leftblock', 'main')
+    );
 
     // Rights
     $this->rights = array();
     $r=0;
-    $this->rights[$r][0] = 12990101;               // id
-    $this->rights[$r][1] = 'Read LeftMenu';        // label
-    $this->rights[$r][2] = 'r';                    // type
-    $this->rights[$r][3] = 1;                      // default
-    $this->rights[$r][4] = 'read';                 // perm code
+    $this->rights[$r][0] = 12990101;
+    $this->rights[$r][1] = 'Use FancyLeftMenu';
+    $this->rights[$r][2] = 'r';
+    $this->rights[$r][3] = 1;
+    $this->rights[$r][4] = 'read';
     $r++;
 
-    // Menus
-    $this->menu = array();
+    // Configuration constants
+    $this->const = array();
+    $this->const[0] = array(
+      'FANCY_LEFTMENU_THEME',
+      'chaine',
+      'dark',
+      'Default theme for fancy left menu (dark/light)',
+      0
+    );
+    $this->const[1] = array(
+      'FANCY_LEFTMENU_COLLAPSED',
+      'chaine',
+      '0',
+      'Default collapsed state (0/1)',
+      0
+    );
+  }
 
-    // Top menu
-    $this->menu[] = array(
-      'fk_menu'  => 0,
-      'type'     => 'top',
-      'titre'    => 'LeftMenu',
-      'mainmenu' => 'leftmenu',
-      'leftmenu' => '',
-      'url'      => '/custom/leftmenu/index.php',
-      'langs'    => 'leftmenu@leftmenu',
-      'position' => 110,
-      'enabled'  => '1',
-      'perms'    => '$user->rights->leftmenu->read'
-    );
+  public function init($options = '')
+  {
+    $sql = array();
+    return $this->_init($sql, $options);
+  }
 
-    // Left menus
-    $this->menu[] = array(
-      'fk_menu'  => 'fk_mainmenu=leftmenu',
-      'type'     => 'left',
-      'titre'    => 'Pregled',
-      'mainmenu' => 'leftmenu',
-      'leftmenu' => 'lm_home',
-      'url'      => '/custom/leftmenu/index.php',
-      'position' => 10,
-      'enabled'  => '1',
-      'perms'    => '$user->rights->leftmenu->read'
-    );
-    $this->menu[] = array(
-      'fk_menu'  => 'fk_mainmenu=leftmenu',
-      'type'     => 'left',
-      'titre'    => 'Stavke',
-      'mainmenu' => 'leftmenu',
-      'leftmenu' => 'lm_items',
-      'url'      => '/custom/leftmenu/items.php',
-      'position' => 20,
-      'enabled'  => '1',
-      'perms'    => '$user->rights->leftmenu->read'
-    );
-    $this->menu[] = array(
-      'fk_menu'  => 'fk_mainmenu=leftmenu',
-      'type'     => 'left',
-      'titre'    => 'Postavke',
-      'mainmenu' => 'leftmenu',
-      'leftmenu' => 'lm_settings',
-      'url'      => '/custom/leftmenu/settings.php',
-      'position' => 30,
-      'enabled'  => '1',
-      'perms'    => '$user->rights->leftmenu->read'
-    );
+  public function remove($options = '')
+  {
+    $sql = array();
+    return $this->_remove($sql, $options);
   }
 }

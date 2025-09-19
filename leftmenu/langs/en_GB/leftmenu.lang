@@ -1,5 +1,12 @@
-LeftMenu=LeftMenu
-Read LeftMenu=Read LeftMenu
-Pregled=Overview
-Stavke=Items
-Postavke=Settings
+# FancyLeftMenu English translations
+FancyLeftMenu=Fancy Left Menu
+FancyLeftMenuSetup=Fancy Left Menu Setup
+Theme=Theme
+Dark=Dark
+Light=Light
+DefaultCollapsed=Default Collapsed
+SetupSaved=Settings saved
+BackToModuleList=Back to module list
+Parameter=Parameter
+Value=Value
+Save=Save

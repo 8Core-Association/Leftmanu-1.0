@@ -1,5 +1,12 @@
-LeftMenu=LeftMenu
-Read LeftMenu=Čitaj LeftMenu
-Pregled=Pregled
-Stavke=Stavke
-Postavke=Postavke
+# FancyLeftMenu Croatian translations
+FancyLeftMenu=Fancy Left Menu
+FancyLeftMenuSetup=Fancy Left Menu postavke
+Theme=Tema
+Dark=Tamna
+Light=Svijetla
+DefaultCollapsed=Zadano sažeto
+SetupSaved=Postavke spremljene
+BackToModuleList=Povratak na popis modula
+Parameter=Parametar
+Value=Vrijednost
+Save=Spremi
