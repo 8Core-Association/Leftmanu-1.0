@@ -35,8 +35,7 @@ class ActionsLeftmenu
         
         // Hide original menu
         echo '<style>
-            #id-left { display: none !important; }
-            .side-nav-vert { display: none !important; }
+            div#id-left { display: none !important; }
             #id-container { margin-left: 280px !important; }
         </style>';
         
@@ -50,9 +49,9 @@ class ActionsLeftmenu
         <style>
         .fancy-left-menu {
             position: fixed;
-            top: 0;
+            top: 60px;
             left: 0;
-            height: 100vh;
+            height: calc(100vh - 60px);
             width: 280px;
             background: <?php echo $theme == 'dark' ? '#1f2937' : '#ffffff'; ?>;
             border-right: 1px solid <?php echo $theme == 'dark' ? '#374151' : '#e5e7eb'; ?>;
