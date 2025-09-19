@@ -70,80 +70,49 @@ class ActionsLeftmenu
         
         $menuItems = array();
         
-        // Try to get menu from global menumanager
-        if (!empty($menumanager) && is_object($menumanager) && !empty($menumanager->menu)) {
-            foreach ($menumanager->menu as $menuentry) {
-                // Get main menu items (level 0)
-                if (!empty($menuentry['mainmenu']) && empty($menuentry['leftmenu']) && $menuentry['level'] == 0) {
-                    $menuItems[] = array(
-                        'title' => $langs->trans($menuentry['titre']) ?: $menuentry['titre'],
-                        'url' => $menuentry['url'],
-                        'icon' => $this->getMenuIcon($menuentry['mainmenu']),
-                        'mainmenu' => $menuentry['mainmenu']
-                    );
-                }
-            }
-        }
-        
-        // If no menu found, create based on enabled modules
-        if (empty($menuItems)) {
-            if (!empty($conf->societe->enabled)) {
-                $menuItems[] = array(
-                    'title' => $langs->trans('ThirdParties'), 
-                    'url' => '/societe/index.php', 
-                    'icon' => '🏢', 
-                    'mainmenu' => 'companies'
-                );
-            }
-            if (!empty($conf->product->enabled) || !empty($conf->service->enabled)) {
-                $menuItems[] = array(
-                    'title' => $langs->trans('Products'), 
-                    'url' => '/product/index.php', 
-                    'icon' => '📦', 
-                    'mainmenu' => 'products'
-                );
-            }
-            if (!empty($conf->facture->enabled)) {
-                $menuItems[] = array(
-                    'title' => $langs->trans('Invoices'), 
-                    'url' => '/compta/facture/list.php', 
-                    'icon' => '💰', 
-                    'mainmenu' => 'billing'
-                );
-            }
-            if (!empty($conf->commande->enabled)) {
-                $menuItems[] = array(
-                    'title' => $langs->trans('Orders'), 
-                    'url' => '/commande/list.php', 
-                    'icon' => '📋', 
-                    'mainmenu' => 'orders'
-                );
-            }
-            if (!empty($conf->projet->enabled)) {
-                $menuItems[] = array(
-                    'title' => $langs->trans('Projects'), 
-                    'url' => '/projet/index.php', 
-                    'icon' => '📊', 
-                    'mainmenu' => 'project'
-                );
-            }
-            if ($user->admin) {
-                $menuItems[] = array(
-                    'title' => $langs->trans('Tools'), 
-                    'url' => '/admin/index.php', 
-                    'icon' => '🔧', 
-                    'mainmenu' => 'tools'
-                );
-            }
-        }
-        
-        // Always add Home at the beginning
-        array_unshift($menuItems, array(
+        // Always add Home first
+        $menuItems[] = array(
             'title' => $langs->trans('Home'), 
             'url' => '/index.php', 
             'icon' => '🏠', 
             'mainmenu' => 'home'
-        ));
+        );
+        
+        // Get real Dolibarr menu using menu manager
+        require_once DOL_DOCUMENT_ROOT.'/core/class/menubase.class.php';
+        
+        // Load menu entries from database
+        $sql = "SELECT m.rowid, m.mainmenu, m.leftmenu, m.fk_menu, m.url, m.titre, m.langs, m.position";
+        $sql.= " FROM ".MAIN_DB_PREFIX."menu as m";
+        $sql.= " WHERE m.entity IN (0,".$conf->entity.")";
+        $sql.= " AND m.enabled = 1";
+        $sql.= " AND m.mainmenu != ''";
+        $sql.= " AND (m.leftmenu = '' OR m.leftmenu IS NULL)"; // Only main menu items
+        $sql.= " ORDER BY m.position, m.rowid";
+        
+        $resql = $this->db->query($sql);
+        if ($resql) {
+            while ($obj = $this->db->fetch_object($resql)) {
+                // Check if user has permission for this menu
+                $perms = 1; // Default allow
+                
+                // Translate title
+                $title = $obj->titre;
+                if (!empty($obj->langs)) {
+                    $langs->load($obj->langs);
+                    $title = $langs->trans($obj->titre);
+                }
+                
+                if ($perms) {
+                    $menuItems[] = array(
+                        'title' => $title,
+                        'url' => $obj->url,
+                        'icon' => $this->getMenuIcon($obj->mainmenu),
+                        'mainmenu' => $obj->mainmenu
+                    );
+                }
+            }
+        }
         
         return $menuItems;
     }
