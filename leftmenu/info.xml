@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+  <name>LeftMenu</name>
+  <desc>Lightweight left-side menu module (clean, scoped, no core override)</desc>
+  <editor_name>8Core Association</editor_name>
+  <editor_url>https://8core.hr</editor_url>
+  <version>1.0.0</version>
+  <url>http://example.local/custom/leftmenu/index.php</url>
+  <family>ECM</family>
+  <need_dolibarr_version_min>20.0.0</need_dolibarr_version_min>
+  <need_dolibarr_version_max></need_dolibarr_version_max>
+  <phpmin>8.0</phpmin>
+  <dependsmodules></dependsmodules>
+  <langfiles>leftmenu@leftmenu</langfiles>
+</module>
