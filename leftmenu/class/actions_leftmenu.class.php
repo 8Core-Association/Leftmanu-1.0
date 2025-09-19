@@ -11,7 +11,6 @@ class ActionsLeftmenu
 
     public function printLeftBlock($parameters, &$object, &$action, $hookmanager)
     {
-        // This hook might not work, trying different approach
         return $this->renderFancyMenu();
     }
 
@@ -27,14 +26,11 @@ class ActionsLeftmenu
 
     private function renderFancyMenu()
     {
-        global $conf, $user, $langs;
+        global $conf, $user, $langs, $menumanager;
         
         // Check if module is enabled
         if (empty($conf->leftmenu->enabled)) return 0;
         
-        // Debug output
-        error_log("FancyLeftMenu: printLeftBlock called");
-
         // Get real Dolibarr menu items
         $menuItems = $this->getDolibarrMenuItems();
         
@@ -44,12 +40,10 @@ class ActionsLeftmenu
         
         // Hide original menu with JavaScript
         echo '<style>
-            /* Hide only original left menu, NOT top menu */
             div#id-left { 
                 display: none !important; 
             }
             
-            /* Adjust main content container */
             #id-container { 
                 margin-left: 280px !important; 
             }
@@ -57,11 +51,9 @@ class ActionsLeftmenu
         
         echo '<script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Hide only left menu, preserve top menu
             var leftMenu = document.querySelector("#id-left");
             if (leftMenu) leftMenu.style.display = "none";
             
-            // Adjust container
             var container = document.querySelector("#id-container");
             if (container) {
                 container.style.marginLeft = "280px";
@@ -79,7 +71,6 @@ class ActionsLeftmenu
         $menuItems = array();
         
         // Try to get menu from global menumanager
-        global $menumanager;
         if (!empty($menumanager) && is_object($menumanager) && !empty($menumanager->menu)) {
             foreach ($menumanager->menu as $menuentry) {
                 // Get main menu items (level 0)
@@ -94,34 +85,65 @@ class ActionsLeftmenu
             }
         }
         
-        // If no menu found, try alternative approach
+        // If no menu found, create based on enabled modules
         if (empty($menuItems)) {
-            // Include menu manager
-            require_once DOL_DOCUMENT_ROOT.'/core/class/menubase.class.php';
-            
-            // Get enabled modules and create menu based on them
             if (!empty($conf->societe->enabled)) {
-                $menuItems[] = array('title' => $langs->trans('ThirdParties'), 'url' => DOL_URL_ROOT.'/societe/index.php', 'icon' => '🏢', 'mainmenu' => 'companies');
+                $menuItems[] = array(
+                    'title' => $langs->trans('ThirdParties'), 
+                    'url' => '/societe/index.php', 
+                    'icon' => '🏢', 
+                    'mainmenu' => 'companies'
+                );
             }
             if (!empty($conf->product->enabled) || !empty($conf->service->enabled)) {
-                $menuItems[] = array('title' => $langs->trans('Products'), 'url' => DOL_URL_ROOT.'/product/index.php', 'icon' => '📦', 'mainmenu' => 'products');
+                $menuItems[] = array(
+                    'title' => $langs->trans('Products'), 
+                    'url' => '/product/index.php', 
+                    'icon' => '📦', 
+                    'mainmenu' => 'products'
+                );
             }
             if (!empty($conf->facture->enabled)) {
-                $menuItems[] = array('title' => $langs->trans('Invoices'), 'url' => DOL_URL_ROOT.'/compta/facture/list.php', 'icon' => '💰', 'mainmenu' => 'billing');
+                $menuItems[] = array(
+                    'title' => $langs->trans('Invoices'), 
+                    'url' => '/compta/facture/list.php', 
+                    'icon' => '💰', 
+                    'mainmenu' => 'billing'
+                );
             }
             if (!empty($conf->commande->enabled)) {
-                $menuItems[] = array('title' => $langs->trans('Orders'), 'url' => DOL_URL_ROOT.'/commande/list.php', 'icon' => '📋', 'mainmenu' => 'orders');
+                $menuItems[] = array(
+                    'title' => $langs->trans('Orders'), 
+                    'url' => '/commande/list.php', 
+                    'icon' => '📋', 
+                    'mainmenu' => 'orders'
+                );
             }
             if (!empty($conf->projet->enabled)) {
-                $menuItems[] = array('title' => $langs->trans('Projects'), 'url' => DOL_URL_ROOT.'/projet/index.php', 'icon' => '📊', 'mainmenu' => 'project');
+                $menuItems[] = array(
+                    'title' => $langs->trans('Projects'), 
+                    'url' => '/projet/index.php', 
+                    'icon' => '📊', 
+                    'mainmenu' => 'project'
+                );
             }
             if ($user->admin) {
-                $menuItems[] = array('title' => $langs->trans('Tools'), 'url' => DOL_URL_ROOT.'/admin/index.php', 'icon' => '🔧', 'mainmenu' => 'tools');
+                $menuItems[] = array(
+                    'title' => $langs->trans('Tools'), 
+                    'url' => '/admin/index.php', 
+                    'icon' => '🔧', 
+                    'mainmenu' => 'tools'
+                );
             }
         }
         
         // Always add Home at the beginning
-        array_unshift($menuItems, array('title' => $langs->trans('Home'), 'url' => DOL_URL_ROOT.'/index.php', 'icon' => '🏠', 'mainmenu' => 'home'));
+        array_unshift($menuItems, array(
+            'title' => $langs->trans('Home'), 
+            'url' => '/index.php', 
+            'icon' => '🏠', 
+            'mainmenu' => 'home'
+        ));
         
         return $menuItems;
     }
@@ -146,12 +168,6 @@ class ActionsLeftmenu
         );
         
         return isset($icons[$mainmenu]) ? $icons[$mainmenu] : '📋';
-    }
-            }
-        });
-        </script>';
-        
-        return 1;
     }
 
     private function renderMenu($menuItems, $theme, $user)
