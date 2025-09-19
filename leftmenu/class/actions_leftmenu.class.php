@@ -44,29 +44,157 @@ class ActionsLeftmenu
      */
     private function getMenuItems()
     {
-        global $menumanager, $user, $conf;
+        global $menumanager, $user, $conf, $menu_array_before, $menu_array_after;
         
         $menuItems = array();
         
-        // Get main menu items
+        // Try different ways to get menu items
+        $menus_to_check = array();
+        
+        // Method 1: From menumanager
         if (isset($menumanager->menu) && is_array($menumanager->menu)) {
-            foreach ($menumanager->menu as $menu) {
-                if ($menu['type'] == 'left' && $menu['enabled'] && 
-                    (empty($menu['perms']) || verifCond($menu['perms']))) {
-                    
-                    $menuItems[] = array(
-                        'title' => $menu['titre'],
-                        'url' => $menu['url'],
-                        'mainmenu' => $menu['mainmenu'],
-                        'leftmenu' => $menu['leftmenu'],
-                        'level' => $menu['level'] ?? 0,
-                        'icon' => $this->getIconForMenu($menu['mainmenu'])
-                    );
-                }
+            $menus_to_check = array_merge($menus_to_check, $menumanager->menu);
+        }
+        
+        // Method 2: From global menu arrays
+        if (isset($menu_array_before) && is_array($menu_array_before)) {
+            $menus_to_check = array_merge($menus_to_check, $menu_array_before);
+        }
+        if (isset($menu_array_after) && is_array($menu_array_after)) {
+            $menus_to_check = array_merge($menus_to_check, $menu_array_after);
+        }
+        
+        // Method 3: Manually create basic menu items if nothing found
+        if (empty($menus_to_check)) {
+            $menus_to_check = $this->createBasicMenuItems();
+        }
+        
+        // Process found menus
+        foreach ($menus_to_check as $menu) {
+            if (is_array($menu) && 
+                (!isset($menu['type']) || $menu['type'] == 'left') && 
+                (!isset($menu['enabled']) || $menu['enabled'])) {
+                
+                $menuItems[] = array(
+                    'title' => $menu['titre'] ?? $menu['title'] ?? 'Menu Item',
+                    'url' => $menu['url'] ?? '#',
+                    'mainmenu' => $menu['mainmenu'] ?? 'home',
+                    'leftmenu' => $menu['leftmenu'] ?? '',
+                    'level' => $menu['level'] ?? 0,
+                    'icon' => $this->getIconForMenu($menu['mainmenu'] ?? 'home')
+                );
             }
         }
         
         return $this->organizeMenuItems($menuItems);
+    }
+    
+    /**
+     * Create basic menu items if none found
+     */
+    private function createBasicMenuItems()
+    {
+        global $user, $conf;
+        
+        $basicMenus = array();
+        
+        // Home
+        $basicMenus[] = array(
+            'titre' => 'Home',
+            'url' => '/index.php',
+            'mainmenu' => 'home',
+            'leftmenu' => 'home',
+            'level' => 0,
+            'enabled' => 1
+        );
+        
+        // Companies (if enabled)
+        if (!empty($conf->societe->enabled)) {
+            $basicMenus[] = array(
+                'titre' => 'Third parties',
+                'url' => '/societe/index.php',
+                'mainmenu' => 'companies',
+                'leftmenu' => 'companies',
+                'level' => 0,
+                'enabled' => 1
+            );
+        }
+        
+        // Products (if enabled)
+        if (!empty($conf->product->enabled)) {
+            $basicMenus[] = array(
+                'titre' => 'Products/Services',
+                'url' => '/product/index.php',
+                'mainmenu' => 'products',
+                'leftmenu' => 'products',
+                'level' => 0,
+                'enabled' => 1
+            );
+        }
+        
+        // Commercial (if enabled)
+        if (!empty($conf->propal->enabled) || !empty($conf->commande->enabled)) {
+            $basicMenus[] = array(
+                'titre' => 'Commercial',
+                'url' => '/comm/index.php',
+                'mainmenu' => 'commercial',
+                'leftmenu' => 'commercial',
+                'level' => 0,
+                'enabled' => 1
+            );
+        }
+        
+        // Billing (if enabled)
+        if (!empty($conf->facture->enabled)) {
+            $basicMenus[] = array(
+                'titre' => 'Billing',
+                'url' => '/compta/facture/index.php',
+                'mainmenu' => 'billing',
+                'leftmenu' => 'billing',
+                'level' => 0,
+                'enabled' => 1
+            );
+        }
+        
+        // Tools (always available for admin)
+        if ($user->admin) {
+            $basicMenus[] = array(
+                'titre' => 'Tools',
+                'url' => '/admin/index.php',
+                'mainmenu' => 'tools',
+                'leftmenu' => 'tools',
+                'level' => 0,
+                'enabled' => 1
+            );
+        }
+        
+        return $basicMenus;
+    }
+    
+    /**
+     * Hook to replace left menu - try multiple hook points
+     */
+    public function printCommonFooter($parameters, &$object, &$action, $hookmanager)
+    {
+        return $this->printLeftBlock($parameters, $object, $action, $hookmanager);
+    }
+    
+    public function printMainArea($parameters, &$object, &$action, $hookmanager)
+    {
+        return $this->printLeftBlock($parameters, $object, $action, $hookmanager);
+    }
+    
+    public function doActions($parameters, &$object, &$action, $hookmanager)
+    {
+        return $this->printLeftBlock($parameters, $object, $action, $hookmanager);
+    }
+    
+    public function formObjectOptions($parameters, &$object, &$action, $hookmanager)
+    {
+        return $this->printLeftBlock($parameters, $object, $action, $hookmanager);
+                }
+        
+        return 0;
     }
 
     /**

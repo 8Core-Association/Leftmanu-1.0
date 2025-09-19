@@ -2,7 +2,7 @@
 /**
  * Setup page for FancyLeftMenu
  */
-require_once '../../../main.inc.php';
+require_once '../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 
 // Security check
