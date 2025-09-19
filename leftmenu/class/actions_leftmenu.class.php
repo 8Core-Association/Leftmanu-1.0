@@ -11,24 +11,34 @@ class ActionsLeftmenu
 
     public function printLeftBlock($parameters, &$object, &$action, $hookmanager)
     {
-        global $conf, $user;
+        global $conf, $user, $langs;
         
-        if (!$conf->leftmenu->enabled) return 0;
+        // Check if module is enabled
+        if (empty($conf->leftmenu->enabled)) return 0;
+        
+        // Debug output
+        error_log("FancyLeftMenu: printLeftBlock called");
 
         // Simple menu items
         $menuItems = array(
             array('title' => 'Home', 'url' => '/index.php', 'icon' => 'fas fa-home'),
-            array('title' => 'Companies', 'url' => '/societe/index.php', 'icon' => 'fas fa-building'),
-            array('title' => 'Products', 'url' => '/product/index.php', 'icon' => 'fas fa-box'),
-            array('title' => 'Commercial', 'url' => '/comm/index.php', 'icon' => 'fas fa-handshake'),
-            array('title' => 'Billing', 'url' => '/compta/facture/index.php', 'icon' => 'fas fa-file-invoice'),
-            array('title' => 'Tools', 'url' => '/admin/index.php', 'icon' => 'fas fa-tools')
+            array('title' => 'Companies', 'url' => '/societe/index.php', 'icon' => '🏢'),
+            array('title' => 'Products', 'url' => '/product/index.php', 'icon' => '📦'),
+            array('title' => 'Commercial', 'url' => '/comm/index.php', 'icon' => '🤝'),
+            array('title' => 'Billing', 'url' => '/compta/facture/index.php', 'icon' => '💰'),
+            array('title' => 'Tools', 'url' => '/admin/index.php', 'icon' => '🔧')
         );
 
         $theme = !empty($conf->global->FANCY_LEFTMENU_THEME) ? $conf->global->FANCY_LEFTMENU_THEME : 'dark';
         
         echo $this->renderMenu($menuItems, $theme, $user);
-        echo '<style>#id-left { display: none !important; }</style>';
+        
+        // Hide original menu
+        echo '<style>
+            #id-left { display: none !important; }
+            .side-nav-vert { display: none !important; }
+            #id-container { margin-left: 280px !important; }
+        </style>';
         
         return 1;
     }
@@ -92,11 +102,11 @@ class ActionsLeftmenu
 
         <div class="fancy-left-menu">
             <div class="flm-header">
-                <i class="fas fa-cube"></i> Dolibarr
+                🚀 Dolibarr Menu
             </div>
             <?php foreach ($menuItems as $item): ?>
                 <a href="<?php echo DOL_URL_ROOT.$item['url']; ?>" class="flm-menu-item">
-                    <i class="<?php echo $item['icon']; ?> flm-menu-icon"></i>
+                    <span class="flm-menu-icon"><?php echo $item['icon']; ?></span>
                     <?php echo $item['title']; ?>
                 </a>
             <?php endforeach; ?>
