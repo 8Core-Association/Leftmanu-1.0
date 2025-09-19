@@ -104,15 +104,17 @@ class ActionsLeftmenu
         <style>
         .fancy-left-menu {
             position: fixed;
-            top: 60px;
+            top: 0;
             left: 0;
-            height: calc(100vh - 60px);
+            height: 100vh;
+            padding-top: 60px;
             width: 280px;
             background: <?php echo $theme == 'dark' ? '#1f2937' : '#ffffff'; ?>;
             border-right: 1px solid <?php echo $theme == 'dark' ? '#374151' : '#e5e7eb'; ?>;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             z-index: 1000;
             overflow-y: auto;
+            box-sizing: border-box;
         }
 
         .flm-header {
