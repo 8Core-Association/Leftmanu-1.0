@@ -35,34 +35,9 @@ class ActionsLeftmenu
         // Debug output
         error_log("FancyLeftMenu: printLeftBlock called");
 
-        // Get Dolibarr menu items or create basic ones
-        $menuItems = array(
-            array('title' => 'Home', 'url' => DOL_URL_ROOT.'/index.php', 'icon' => '🏠'),
-            array('title' => 'Third Parties', 'url' => DOL_URL_ROOT.'/societe/index.php', 'icon' => '🏢'),
-            array('title' => 'Products/Services', 'url' => DOL_URL_ROOT.'/product/index.php', 'icon' => '📦'),
-            array('title' => 'Commercial', 'url' => DOL_URL_ROOT.'/comm/index.php', 'icon' => '🤝'),
-            array('title' => 'Invoices', 'url' => DOL_URL_ROOT.'/compta/facture/list.php', 'icon' => '💰'),
-            array('title' => 'Tools', 'url' => DOL_URL_ROOT.'/admin/index.php', 'icon' => '🔧')
-        );
-
-        // Try to get real Dolibarr menu
-        global $menumanager;
-        if (!empty($menumanager) && !empty($menumanager->menu)) {
-            $realMenuItems = array();
-            foreach ($menumanager->menu as $menu) {
-                if (!empty($menu['mainmenu']) && empty($menu['leftmenu'])) {
-                    $realMenuItems[] = array(
-                        'title' => $menu['titre'] ?? $menu['mainmenu'],
-                        'url' => $menu['url'] ?? '#',
-                        'icon' => '📋'
-                    );
-                }
-            }
-            if (!empty($realMenuItems)) {
-                $menuItems = $realMenuItems;
-            }
-        }
-
+        // Get real Dolibarr menu items
+        $menuItems = $this->getDolibarrMenuItems();
+        
         $theme = !empty($conf->global->FANCY_LEFTMENU_THEME) ? $conf->global->FANCY_LEFTMENU_THEME : 'dark';
         
         echo $this->renderMenu($menuItems, $theme, $user);
@@ -90,6 +65,88 @@ class ActionsLeftmenu
             var container = document.querySelector("#id-container");
             if (container) {
                 container.style.marginLeft = "280px";
+            }
+        });
+        </script>';
+        
+        return 1;
+    }
+
+    private function getDolibarrMenuItems()
+    {
+        global $conf, $user, $langs, $menumanager;
+        
+        $menuItems = array();
+        
+        // Try to get menu from global menumanager
+        global $menumanager;
+        if (!empty($menumanager) && is_object($menumanager) && !empty($menumanager->menu)) {
+            foreach ($menumanager->menu as $menuentry) {
+                // Get main menu items (level 0)
+                if (!empty($menuentry['mainmenu']) && empty($menuentry['leftmenu']) && $menuentry['level'] == 0) {
+                    $menuItems[] = array(
+                        'title' => $langs->trans($menuentry['titre']) ?: $menuentry['titre'],
+                        'url' => $menuentry['url'],
+                        'icon' => $this->getMenuIcon($menuentry['mainmenu']),
+                        'mainmenu' => $menuentry['mainmenu']
+                    );
+                }
+            }
+        }
+        
+        // If no menu found, try alternative approach
+        if (empty($menuItems)) {
+            // Include menu manager
+            require_once DOL_DOCUMENT_ROOT.'/core/class/menubase.class.php';
+            
+            // Get enabled modules and create menu based on them
+            if (!empty($conf->societe->enabled)) {
+                $menuItems[] = array('title' => $langs->trans('ThirdParties'), 'url' => DOL_URL_ROOT.'/societe/index.php', 'icon' => '🏢', 'mainmenu' => 'companies');
+            }
+            if (!empty($conf->product->enabled) || !empty($conf->service->enabled)) {
+                $menuItems[] = array('title' => $langs->trans('Products'), 'url' => DOL_URL_ROOT.'/product/index.php', 'icon' => '📦', 'mainmenu' => 'products');
+            }
+            if (!empty($conf->facture->enabled)) {
+                $menuItems[] = array('title' => $langs->trans('Invoices'), 'url' => DOL_URL_ROOT.'/compta/facture/list.php', 'icon' => '💰', 'mainmenu' => 'billing');
+            }
+            if (!empty($conf->commande->enabled)) {
+                $menuItems[] = array('title' => $langs->trans('Orders'), 'url' => DOL_URL_ROOT.'/commande/list.php', 'icon' => '📋', 'mainmenu' => 'orders');
+            }
+            if (!empty($conf->projet->enabled)) {
+                $menuItems[] = array('title' => $langs->trans('Projects'), 'url' => DOL_URL_ROOT.'/projet/index.php', 'icon' => '📊', 'mainmenu' => 'project');
+            }
+            if ($user->admin) {
+                $menuItems[] = array('title' => $langs->trans('Tools'), 'url' => DOL_URL_ROOT.'/admin/index.php', 'icon' => '🔧', 'mainmenu' => 'tools');
+            }
+        }
+        
+        // Always add Home at the beginning
+        array_unshift($menuItems, array('title' => $langs->trans('Home'), 'url' => DOL_URL_ROOT.'/index.php', 'icon' => '🏠', 'mainmenu' => 'home'));
+        
+        return $menuItems;
+    }
+
+    private function getMenuIcon($mainmenu)
+    {
+        $icons = array(
+            'home' => '🏠',
+            'companies' => '🏢',
+            'products' => '📦',
+            'commercial' => '🤝',
+            'billing' => '💰',
+            'orders' => '📋',
+            'suppliers' => '🚚',
+            'projects' => '📊',
+            'hrm' => '👥',
+            'tools' => '🔧',
+            'members' => '👤',
+            'accountancy' => '📊',
+            'bank' => '🏦',
+            'agenda' => '📅'
+        );
+        
+        return isset($icons[$mainmenu]) ? $icons[$mainmenu] : '📋';
+    }
             }
         });
         </script>';
