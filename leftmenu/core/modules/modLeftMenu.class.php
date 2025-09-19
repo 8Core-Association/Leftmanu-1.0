@@ -22,7 +22,7 @@ class modLeftMenu extends DolibarrModules
 
         // Module parts - enable hooks
         $this->module_parts = array(
-            'hooks' => array('leftblock')
+            'hooks' => array('commonobject', 'main')
         );
 
         // Dirs

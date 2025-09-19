@@ -11,6 +11,22 @@ class ActionsLeftmenu
 
     public function printLeftBlock($parameters, &$object, &$action, $hookmanager)
     {
+        // This hook might not work, trying different approach
+        return $this->renderFancyMenu();
+    }
+
+    public function printCommonFooter($parameters, &$object, &$action, $hookmanager)
+    {
+        return $this->renderFancyMenu();
+    }
+
+    public function doActions($parameters, &$object, &$action, $hookmanager)
+    {
+        return $this->renderFancyMenu();
+    }
+
+    private function renderFancyMenu()
+    {
         global $conf, $user, $langs;
         
         // Check if module is enabled
@@ -19,25 +35,69 @@ class ActionsLeftmenu
         // Debug output
         error_log("FancyLeftMenu: printLeftBlock called");
 
-        // Simple menu items
+        // Get Dolibarr menu items or create basic ones
         $menuItems = array(
-            array('title' => 'Home', 'url' => '/index.php', 'icon' => 'fas fa-home'),
-            array('title' => 'Companies', 'url' => '/societe/index.php', 'icon' => '🏢'),
-            array('title' => 'Products', 'url' => '/product/index.php', 'icon' => '📦'),
-            array('title' => 'Commercial', 'url' => '/comm/index.php', 'icon' => '🤝'),
-            array('title' => 'Billing', 'url' => '/compta/facture/index.php', 'icon' => '💰'),
-            array('title' => 'Tools', 'url' => '/admin/index.php', 'icon' => '🔧')
+            array('title' => 'Home', 'url' => DOL_URL_ROOT.'/index.php', 'icon' => '🏠'),
+            array('title' => 'Third Parties', 'url' => DOL_URL_ROOT.'/societe/index.php', 'icon' => '🏢'),
+            array('title' => 'Products/Services', 'url' => DOL_URL_ROOT.'/product/index.php', 'icon' => '📦'),
+            array('title' => 'Commercial', 'url' => DOL_URL_ROOT.'/comm/index.php', 'icon' => '🤝'),
+            array('title' => 'Invoices', 'url' => DOL_URL_ROOT.'/compta/facture/list.php', 'icon' => '💰'),
+            array('title' => 'Tools', 'url' => DOL_URL_ROOT.'/admin/index.php', 'icon' => '🔧')
         );
+
+        // Try to get real Dolibarr menu
+        global $menumanager;
+        if (!empty($menumanager) && !empty($menumanager->menu)) {
+            $realMenuItems = array();
+            foreach ($menumanager->menu as $menu) {
+                if (!empty($menu['mainmenu']) && empty($menu['leftmenu'])) {
+                    $realMenuItems[] = array(
+                        'title' => $menu['titre'] ?? $menu['mainmenu'],
+                        'url' => $menu['url'] ?? '#',
+                        'icon' => '📋'
+                    );
+                }
+            }
+            if (!empty($realMenuItems)) {
+                $menuItems = $realMenuItems;
+            }
+        }
 
         $theme = !empty($conf->global->FANCY_LEFTMENU_THEME) ? $conf->global->FANCY_LEFTMENU_THEME : 'dark';
         
         echo $this->renderMenu($menuItems, $theme, $user);
         
-        // Hide original menu
+        // Hide original menu with JavaScript
         echo '<style>
-            div#id-left { display: none !important; }
-            #id-container { margin-left: 280px !important; }
+            /* Hide original left menu */
+            div#id-left, 
+            .side-nav-vert,
+            #leftmenu { 
+                display: none !important; 
+            }
+            
+            /* Adjust main container */
+            #id-container,
+            .fiche { 
+                margin-left: 280px !important; 
+            }
         </style>';
+        
+        echo '<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Additional JavaScript hiding
+            var leftMenus = document.querySelectorAll("#id-left, .side-nav-vert, #leftmenu");
+            leftMenus.forEach(function(menu) {
+                if (menu) menu.style.display = "none";
+            });
+            
+            // Adjust container
+            var container = document.querySelector("#id-container");
+            if (container) {
+                container.style.marginLeft = "280px";
+            }
+        });
+        </script>';
         
         return 1;
     }
@@ -111,11 +171,6 @@ class ActionsLeftmenu
             <?php endforeach; ?>
         </div>
 
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.body.classList.add('flm-active');
-        });
-        </script>
         <?php
         return ob_get_clean();
     }
