@@ -29,7 +29,7 @@ class modLeftMenu extends DolibarrModules
         $this->dirs = array();
         
         // Config page - direct URL
-        $this->config_page_url = array("admin/setup.php@leftmenu");
+        $this->config_page_url = array("setup.php@leftmenu");
 
         // Rights
         $this->rights = array();
